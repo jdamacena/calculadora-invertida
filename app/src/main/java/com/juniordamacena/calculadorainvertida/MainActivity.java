@@ -1,37 +1,53 @@
 package com.juniordamacena.calculadorainvertida;
 
+import android.app.ActionBar;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 
 import com.fathzer.soft.javaluator.DoubleEvaluator;
 import com.juniordamacena.calculadorainvertida.databinding.ActivityMainBinding;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity {
 
     private EditText txtTela;
     private ActivityMainBinding binding;
+    private boolean calculadoraInvertida = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         txtTela = binding.editText;
+
+        // Caso a calculadora esteja no modo invertido, mostrar uma alerta
+        if (calculadoraInvertida)
+            mostrarAlertaCalculadoraInvertida();
     }
 
     /**
      * Método responsável por tratar o click dos botões para cálculo (listener adicionado via XML)
      */
     public void onClick(View view) {
+        String operador = "";
+
         switch (view.getId()) {
             case R.id.btnResultado:
                 // Obter a expressão numérica
                 String expressaoBonita = txtTela.getText().toString();
                 String expressaoComum = transformarExpressaoBonitaEmExpressaoComum(expressaoBonita);
-                String expressaoInvertida = transformarExpressaoComumEmExpressaoInvertida(expressaoComum);
+                String expressaoInvertida = expressaoComum;
                 String resultado;
+
+                // Inverter a expressão
+                if (calculadoraInvertida)
+                    expressaoInvertida = transformarExpressaoComumEmExpressaoInvertida(expressaoComum);
 
                 try {
                     resultado = String.valueOf(new DoubleEvaluator().evaluate(expressaoInvertida));
@@ -46,51 +62,140 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 break;
             case R.id.btnLimpar:
+
+                // Limpar a tela
                 txtTela.setText("");
                 break;
+            case R.id.btnApagarUltCaractere:
+                String expressao = txtTela.getText().toString();
+                expressao = expressao.replaceAll("(.*).", "$1"); // Apagar o último caractere
+
+                txtTela.setText(expressao);
+                break;
+            case R.id.btnAbreParentese:
+                operador = "(";
+                break;
+            case R.id.btnFechaParentese:
+                operador = ")";
+                break;
             case R.id.btnMultiplicacao:
-                txtTela.append("×");
+                operador = "×";
                 break;
             case R.id.btnSubtracao:
-                txtTela.append("-");
+                operador = "-";
                 break;
             case R.id.btnDivisao:
-                txtTela.append("÷");
+                operador = "÷";
                 break;
             case R.id.btnSoma:
-                txtTela.append("+");
+                operador = "+";
                 break;
             case R.id.btnNumNove:
-                txtTela.append("9");
+                operador = "9";
                 break;
             case R.id.btnNumOito:
-                txtTela.append("8");
+                operador = "8";
                 break;
             case R.id.btnNumSete:
-                txtTela.append("7");
+                operador = "7";
                 break;
             case R.id.btnNumSeis:
-                txtTela.append("6");
+                operador = "6";
                 break;
             case R.id.btnNumCinco:
-                txtTela.append("5");
+                operador = "5";
                 break;
             case R.id.btnNumQuatro:
-                txtTela.append("4");
+                operador = "4";
                 break;
             case R.id.btnNumTres:
-                txtTela.append("3");
+                operador = "3";
                 break;
             case R.id.btnNumDois:
-                txtTela.append("2");
+                operador = "2";
                 break;
             case R.id.btnNumUm:
-                txtTela.append("1");
+                operador = "1";
                 break;
             case R.id.btnNumZero:
-                txtTela.append("0");
+                operador = "0";
+                break;
+            case R.id.btnPonto:
+                operador = ".";
                 break;
         }
+
+        txtTela.append(operador);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_principal, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_calc_normal:
+                String titulo;
+
+                // Trocar entre calculadora normal e invertida
+                if (!calculadoraInvertida) {
+
+                    // Calculadora está invertida
+                    mostrarAlertaCalculadoraInvertida();
+
+                    titulo = "Calculadora Invertida";
+                } else {
+                    // Calculadora está normal
+                    titulo = "Calculadora Comum";
+                }
+
+                configurarTituloActionbar(titulo);
+                calculadoraInvertida = !calculadoraInvertida;
+                break;
+            case R.id.action_info:
+                mostrarInformacaoApp();
+                break;
+        }
+
+        return true;
+    }
+
+    /**
+     * Colocar a sctring parâmetro como título da actionbar
+     */
+    private void configurarTituloActionbar(String titulo) {
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(titulo);
+        }
+    }
+
+    /**
+     * Mostrar informações sobre o desenvolvedor do app
+     */
+    private void mostrarInformacaoApp() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.aviso_info_app_titulo)
+                .setMessage(R.string.aviso_info_app_mensagem)
+                .setNeutralButton(R.string.aviso_info_app_txt_btn_aceitar, null)
+                .setIcon(R.drawable.ic_info2)
+                .show();
+    }
+
+    /**
+     * Mostrar um aviso informando que essa calculadora tem um comportamento não usual
+     */
+    private void mostrarAlertaCalculadoraInvertida() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.aviso_calc_invertida_titulo)
+                .setMessage(R.string.aviso_calc_invertida_mensagem)
+                .setNeutralButton(R.string.aviso_calc_invertida_txt_btn_aceitar, null)
+                .setIcon(R.drawable.ic_aviso)
+                .show();
     }
 
     /**

@@ -2,4 +2,12 @@
     <string name="app_name">Calculadora Invertida</string>
     <string name="texto_inicial">0</string>
     <string name="simbolo_separador_casa_decimal">.</string>
+    <string name="aviso_calc_invertida_titulo">Atenção</string>
+    <string name="aviso_calc_invertida_mensagem">Essa é uma calculadora invertida: ao invés de somar, ela subtrai, quando é pra subtrair, ela soma, quando é pra dividir ela multiplica e quando é pra multiplicar, ela faz é dividir. \nUse por sua conta e risco</string>
+    <string name="aviso_calc_invertida_txt_btn_aceitar">Entendi</string>
+    <string name="lbl_menu_informacao">Informação</string>
+    <string name="lbl_menu_acionar_calc_normal">Calc. normal</string>
+    <string name="aviso_info_app_titulo">Sobre o app</string>
+    <string name="aviso_info_app_txt_btn_aceitar">Entendi</string>
+    <string name="aviso_info_app_mensagem">Criado por damacenajunior@gmail.com</string>
 </resources>

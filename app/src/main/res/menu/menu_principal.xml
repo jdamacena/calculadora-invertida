@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item
+    android:id="@+id/action_info"
+    android:icon="@drawable/ic_info"
+    android:title="@string/lbl_menu_informacao"/>
+<item
+    android:id="@+id/action_calc_normal"
+    android:icon="@drawable/ic_calc_normal"
+    android:title="@string/lbl_menu_acionar_calc_normal"/>
+</menu>
