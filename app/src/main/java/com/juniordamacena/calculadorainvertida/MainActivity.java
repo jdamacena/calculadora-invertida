@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -16,22 +17,44 @@ import android.widget.EditText;
 
 import com.fathzer.soft.javaluator.DoubleEvaluator;
 import com.juniordamacena.calculadorainvertida.databinding.ActivityMainBinding;
+import com.mcs.easyprefs.EasyPrefsMod;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText txtTela;
     private ActivityMainBinding binding;
-    private boolean calculadoraInvertida = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         txtTela = binding.editText;
+    }
 
-        // Caso a calculadora esteja no modo invertido, mostrar uma alerta
-        if (calculadoraInvertida)
-            mostrarAlertaCalculadoraInvertida();
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Configurar se a calculadora é invertida ou comum
+        configurarModoCalculadora(isCalculadoraInvertida());
+
+        String expressao = txtTela.getText().toString();
+
+        // Recuperar a expressão salva antes de fechar o app (caso não haja nada na tela)
+        if (expressao.isEmpty()) {
+            String expressaoRecuperada = EasyPrefsMod.getDefaultString(this, Preferencias.PREF_ULT_EXPRESSAO);
+            binding.setResultado(expressaoRecuperada);// equivale a -> txtTela.setText(expressaoRecuperada)
+            Log.i("info", expressaoRecuperada);
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        String expressao = txtTela.getText().toString();
+
+        // Guardar a expressão presente na tela
+        EasyPrefsMod.putDefaultString(this, Preferencias.PREF_ULT_EXPRESSAO, expressao);
+        Log.i("info", String.format("Salvou %s", expressao));
     }
 
     /**
@@ -45,11 +68,11 @@ public class MainActivity extends AppCompatActivity {
                 // Obter a expressão numérica
                 String expressaoBonita = txtTela.getText().toString();
                 String expressaoComum = transformarExpressaoBonitaEmExpressaoComum(expressaoBonita);
-                String expressaoInvertida = expressaoComum;
+                String expressaoInvertida = expressaoComum;// Só é processada se o modo da calc. for "invertida"
                 String resultado;
 
                 // Inverter a expressão
-                if (calculadoraInvertida)
+                if (isCalculadoraInvertida())
                     expressaoInvertida = transformarExpressaoComumEmExpressaoInvertida(expressaoComum);
 
                 try {
@@ -142,22 +165,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_calc_normal:
-                String titulo;
+                // Se, no momento está invertida, configurar para ficar comum
+                boolean modo = !isCalculadoraInvertida();
 
                 // Trocar entre calculadora normal e invertida
-                if (!calculadoraInvertida) {
+                configurarModoCalculadora(modo);
 
-                    // Calculadora está invertida
-                    mostrarAlertaCalculadoraInvertida();
-
-                    titulo = "Calculadora Invertida";
-                } else {
-                    // Calculadora está normal
-                    titulo = "Calculadora Comum";
-                }
-
-                configurarTituloActionbar(titulo);
-                calculadoraInvertida = !calculadoraInvertida;
+                // Guardar a preferência
+                setCalculadoraInvertida(modo);
                 break;
             case R.id.action_info:
                 mostrarInformacaoApp();
@@ -165,6 +180,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    /**
+     * Configurar a aparência do app conforme o modo de cálculo
+     *
+     * @param calculadoraInvertida true se a calculadora é invertida, false é calc. comum
+     */
+    private void configurarModoCalculadora(boolean calculadoraInvertida) {
+
+        if (calculadoraInvertida) mostrarAlertaCalculadoraInvertida();
+
+        String titulo = String.format("Calculadora %s", calculadoraInvertida ? "Invertida" : "Comum");
+
+        configurarTituloActionbar(titulo);
     }
 
     /**
@@ -232,6 +261,7 @@ public class MainActivity extends AppCompatActivity {
      * @return expressão baseada na expressão parâmetro mas com os operadores trocados
      */
     private String transformarExpressaoComumEmExpressaoInvertida(String expressaoComum) {
+        // TODO: 24/02/2017 Essa substituição dá problemas quando a expressão contém número negativo
         // Inverter "+" com "-" e "*" com "/"
         return expressaoComum
                 .replace("+", "###")
@@ -240,5 +270,21 @@ public class MainActivity extends AppCompatActivity {
                 .replace("*", "###")
                 .replace("/", "*")
                 .replace("###", "/");
+    }
+
+    /**
+     * Obter, das preferências, a opção do usuário quanto ao modo da calculadora
+     */
+    public boolean isCalculadoraInvertida() {
+        return EasyPrefsMod.getDefaultBoolean(this, Preferencias.PREF_CALC_INVERTIDA, true);
+    }
+
+    /**
+     * Alterar e salvar nas preferências o modo da calculadora
+     *
+     * @param calculadoraInvertida verdadeiro se modo é "invertido" e falso se modo é "comum"
+     */
+    public void setCalculadoraInvertida(boolean calculadoraInvertida) {
+        EasyPrefsMod.putDefaultBoolean(this, Preferencias.PREF_CALC_INVERTIDA, calculadoraInvertida);
     }
 }

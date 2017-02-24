@@ -30,6 +30,9 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.1.0'
     testCompile 'junit:junit:4.12'
 
-    //Disponível em http://javaluator.fathzer.com/en/doc/javadoc/com/fathzer/soft/javaluator/package-summary.html
+    // Disponível em http://javaluator.fathzer.com/en/doc/javadoc/com/fathzer/soft/javaluator/package-summary.html
     compile 'com.fathzer:javaluator:3.0.1'
+
+    // Disponível em https://github.com/Xstar97/easyPrefs
+    compile 'com.github.Xstar97:easyPrefs:1.1.2'
 }
