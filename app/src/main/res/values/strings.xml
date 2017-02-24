@@ -9,5 +9,6 @@
     <string name="lbl_menu_acionar_calc_normal">Modo</string>
     <string name="aviso_info_app_titulo">Sobre o app</string>
     <string name="aviso_info_app_txt_btn_aceitar">Entendi</string>
-    <string name="aviso_info_app_mensagem">Criado por damacenajunior@gmail.com</string>
+    <string name="aviso_info_app_mensagem">Código fonte disponível em %s</string>
+    <string name="link_app_github">https://github.com/jdamacena/calculadora-invertida</string>
 </resources>

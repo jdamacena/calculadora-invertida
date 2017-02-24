@@ -1,6 +1,9 @@
 package com.juniordamacena.calculadorainvertida;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -178,10 +181,21 @@ public class MainActivity extends AppCompatActivity {
      * Mostrar informações sobre o desenvolvedor do app
      */
     private void mostrarInformacaoApp() {
+        final String linkAppGitHub = getString(R.string.link_app_github);
+        String mensagem = getString(R.string.aviso_info_app_mensagem);
+
         new AlertDialog.Builder(this)
                 .setTitle(R.string.aviso_info_app_titulo)
-                .setMessage(R.string.aviso_info_app_mensagem)
+                .setMessage(String.format(mensagem, linkAppGitHub))
                 .setNeutralButton(R.string.aviso_info_app_txt_btn_aceitar, null)
+                .setPositiveButton("GitHub", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(linkAppGitHub));
+                        startActivity(intent);
+                    }
+                })
                 .setIcon(R.drawable.ic_info2)
                 .show();
     }
