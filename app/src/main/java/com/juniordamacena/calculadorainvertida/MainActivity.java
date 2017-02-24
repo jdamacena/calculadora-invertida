@@ -1,8 +1,8 @@
 package com.juniordamacena.calculadorainvertida;
 
-import android.app.ActionBar;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
      * Colocar a sctring parâmetro como título da actionbar
      */
     private void configurarTituloActionbar(String titulo) {
-        ActionBar actionBar = getActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(titulo);
         }
