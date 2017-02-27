@@ -88,6 +88,11 @@ public class MainActivity extends AppCompatActivity {
 
                 try {
                     resultado = String.valueOf(new DoubleEvaluator().evaluate(expressaoInvertida));
+
+                    if (resultado.equalsIgnoreCase("Infinity")) {
+                        resultado = "Infinito";
+                        houveErro = true;
+                    }
                 } catch (IllegalArgumentException e) {
                     resultado = "Erro matemático";
                     houveErro = true;
