@@ -23,6 +23,8 @@ public class MainActivity extends AppCompatActivity {
 
     private EditText txtTela;
     private ActivityMainBinding binding;
+    private static boolean jaMostrouAvisoInicial = false;
+    private boolean houveErro = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         // Configurar se a calculadora é invertida ou comum
         configurarModoCalculadora(isCalculadoraInvertida());
-
+        jaMostrouAvisoInicial = true;
         String expressao = txtTela.getText().toString();
 
         // Recuperar a expressão salva antes de fechar o app (caso não haja nada na tela)
@@ -50,8 +52,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         super.onPause();
-        String expressao = txtTela.getText().toString();
+        guardarEstadoCalculadora();
+    }
 
+    private void guardarEstadoCalculadora() {
+        String expressao = txtTela.getText().toString();
+        if (houveErro) return;
         // Guardar a expressão presente na tela
         EasyPrefsMod.putDefaultString(this, Preferencias.PREF_ULT_EXPRESSAO, expressao);
         Log.i("info", String.format("Salvou %s", expressao));
@@ -62,6 +68,11 @@ public class MainActivity extends AppCompatActivity {
      */
     public void onClick(View view) {
         String operador = "";
+
+        if (houveErro) {
+            limparTela();
+            houveErro = false;
+        }
 
         switch (view.getId()) {
             case R.id.btnResultado:
@@ -79,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
                     resultado = String.valueOf(new DoubleEvaluator().evaluate(expressaoInvertida));
                 } catch (IllegalArgumentException e) {
                     resultado = "Erro matemático";
+                    houveErro = true;
                 } catch (Exception e) {
                     resultado = "Erro";
                 }
@@ -90,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.btnLimpar:
 
                 // Limpar a tela
-                txtTela.setText("");
+                limparTela();
                 break;
             case R.id.btnApagarUltCaractere:
                 String expressao = txtTela.getText().toString();
@@ -154,6 +166,13 @@ public class MainActivity extends AppCompatActivity {
         txtTela.append(operador);
     }
 
+    /**
+     * Limpar o editText que apresenta as operações
+     */
+    private void limparTela() {
+        txtTela.setText("");
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -189,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void configurarModoCalculadora(boolean calculadoraInvertida) {
 
-        if (calculadoraInvertida) mostrarAlertaCalculadoraInvertida();
+        if (calculadoraInvertida && !jaMostrouAvisoInicial) mostrarAlertaCalculadoraInvertida();
 
         String titulo = String.format("Calculadora %s", calculadoraInvertida ? "Invertida" : "Comum");
 
@@ -197,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Colocar a sctring parâmetro como título da actionbar
+     * Colocar a string parâmetro como título da actionbar
      */
     private void configurarTituloActionbar(String titulo) {
         ActionBar actionBar = getSupportActionBar();
@@ -261,15 +280,29 @@ public class MainActivity extends AppCompatActivity {
      * @return expressão baseada na expressão parâmetro mas com os operadores trocados
      */
     private String transformarExpressaoComumEmExpressaoInvertida(String expressaoComum) {
-        // TODO: 24/02/2017 Essa substituição dá problemas quando a expressão contém número negativo
         // Inverter "+" com "-" e "*" com "/"
-        return expressaoComum
-                .replace("+", "###")
-                .replace("-", "+")
-                .replace("###", "-")
-                .replace("*", "###")
-                .replace("/", "*")
-                .replace("###", "/");
+        // Impedir que números negativos tenham o sinal trocado
+        String expressaoInvertida = expressaoComum.replaceAll("(\\D|^)-", "$1@@@");
+
+        // Trocar os '+' pelos '-' e vice-versa
+        expressaoInvertida = trocarCaracteres(expressaoInvertida, "-", "+")
+                // Restaurar o sinal dos números negativos
+                .replace("@@@", "-")
+                // Fazer o jogo de sinais para subtração com números negativos
+                .replace("--", "+");
+
+        // Tocrar os '*' pelos '/' e vice-versa
+        expressaoInvertida = trocarCaracteres(expressaoInvertida, "/", "*");
+
+        Log.i("Info", String.format("Expressão comum: %s", expressaoComum));
+        Log.i("Info", String.format("Expressão invertida: %s", expressaoInvertida));
+        return expressaoInvertida;
+    }
+
+    private String trocarCaracteres(String expressaoInvertida, String target, String replacement) {
+        return expressaoInvertida.replace(replacement, "###")
+                .replace(target, replacement)
+                .replace("###", target);
     }
 
     /**

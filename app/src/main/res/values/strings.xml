@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Calculadora Invertida</string>
+    <string name="app_name">Calc. Invertida</string>
     <string name="texto_inicial">0</string>
     <string name="simbolo_separador_casa_decimal">.</string>
     <string name="aviso_calc_invertida_titulo">Atenção</string>
